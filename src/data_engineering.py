@@ -166,7 +166,24 @@ def compute_acwr_features(df):
         # Clip potential infinity or extreme values
         df[f'acwr_{prefix}'] = df[f'acwr_{prefix}'].replace([np.inf, -np.inf], 0.0).fillna(0.0)
         
-    print("[+] ACWR calculations completed.")
+        # --- OPTION A OPTIMIZATION FEATURES ---
+        # 1. ACWR Lags (1, 2, 3 days)
+        df[f'acwr_{prefix}_lag1'] = df.groupby('player_id')[f'acwr_{prefix}'].shift(1)
+        df[f'acwr_{prefix}_lag2'] = df.groupby('player_id')[f'acwr_{prefix}'].shift(2)
+        df[f'acwr_{prefix}_lag3'] = df.groupby('player_id')[f'acwr_{prefix}'].shift(3)
+        
+        # 2. Acute Load Lag (1 day)
+        df[f'acute_{prefix}_lag1'] = df.groupby('player_id')[f'acute_{prefix}'].shift(1)
+        
+        # 3. Load Momentum / Trend
+        df[f'{prefix}_velocity_7d'] = df[f'acute_{prefix}'] - df.groupby('player_id')[f'acute_{prefix}'].shift(7)
+        df[f'{prefix}_chronic_diff'] = df[f'acute_{prefix}'] - df[f'chronic_{prefix}']
+        
+    # Impute the initial NaN values from shifting with 0.0
+    lag_cols = [c for c in df.columns if 'lag' in c or 'velocity' in c or 'diff' in c]
+    df[lag_cols] = df[lag_cols].fillna(0.0)
+        
+    print("[+] ACWR and lag/momentum calculations completed.")
     return df
 
 def create_predictive_target(df, horizon_days=15):
