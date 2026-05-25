@@ -220,8 +220,12 @@ def split_train_test_chronological(df, test_size=0.10):
     
     return train_df, test_df
 
-def save_dataframes(train_df, test_df, full_df, output_dir='data'):
+def save_dataframes(train_df, test_df, full_df, output_dir=None):
     """Saves the processed datasets as CSV files."""
+    if output_dir is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        output_dir = os.path.join(project_root, 'data')
     print(f"[*] Saving processed datasets to folder: {output_dir}")
     os.makedirs(output_dir, exist_ok=True)
     
@@ -239,7 +243,9 @@ def save_dataframes(train_df, test_df, full_df, output_dir='data'):
 
 def run_pipeline():
     """Executes the complete data engineering pipeline."""
-    raw_filepath = 'data/data_acute_vs_chronic.csv'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    raw_filepath = os.path.join(project_root, 'data', 'data_acute_vs_chronic.csv')
     
     try:
         # 1. Load raw data

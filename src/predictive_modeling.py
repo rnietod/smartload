@@ -19,8 +19,12 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.linear_model import Ridge
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 
-def load_processed_data(data_dir='data'):
+def load_processed_data(data_dir=None):
     """Loads the preprocessed train and test datasets."""
+    if data_dir is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        data_dir = os.path.join(project_root, 'data')
     train_path = os.path.join(data_dir, 'processed_train.csv')
     test_path = os.path.join(data_dir, 'processed_test.csv')
     
@@ -182,8 +186,12 @@ def print_feature_importance(model, feature_names, model_name):
     else:
         print(f"\n[*] Model {model_name} does not support feature importances.")
 
-def save_model(model, model_name, output_dir='models'):
+def save_model(model, model_name, output_dir=None):
     """Saves the trained model object using joblib."""
+    if output_dir is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        output_dir = os.path.join(project_root, 'models')
     os.makedirs(output_dir, exist_ok=True)
     filepath = os.path.join(output_dir, 'best_acwr_model.joblib')
     
