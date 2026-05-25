@@ -1,0 +1,86 @@
+# ============================================================
+# SmartLoad — .gitignore
+# ============================================================
+
+# ---------------------------
+# Datos (no versionar)
+# ---------------------------
+data/
+*.csv
+*.json
+*.parquet
+*.xlsx
+*.xls
+
+# ---------------------------
+# Python
+# ---------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+.eggs/
+*.egg-info/
+dist/
+build/
+
+# ---------------------------
+# Jupyter Notebooks
+# ---------------------------
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ---------------------------
+# Entornos virtuales
+# ---------------------------
+.env
+.env.*
+*.env
+
+# ---------------------------
+# IDEs y editores
+# ---------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---------------------------
+# MLflow / experimentos
+# ---------------------------
+mlruns/
+mlartifacts/
+*.mlmodel
+
+# ---------------------------
+# Modelos entrenados
+# ---------------------------
+models/
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+
+# ---------------------------
+# Logs y salidas
+# ---------------------------
+logs/
+*.log
+outputs/
+
+# ---------------------------
+# Sistema Operativo
+# ---------------------------
+.DS_Store
+Thumbs.db
+desktop.ini

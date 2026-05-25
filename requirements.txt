@@ -1,0 +1,19 @@
+# ====================================================================
+# SmartLoad — Python Dependencies
+# ====================================================================
+
+# Core Data Manipulation
+numpy>=1.24.1
+pandas>=2.0.0
+
+# Machine Learning & Modeling
+scikit-learn>=1.8.0
+scipy>=1.10.0
+joblib>=1.3.0
+
+# Visualization & Reporting
+matplotlib>=3.10.0
+
+# Environment / Development
+# (Optional, uncomment if using Streamlit for visualization)
+# streamlit>=1.30.0
