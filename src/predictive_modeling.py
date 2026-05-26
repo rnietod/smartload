@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.linear_model import Ridge
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 
 def load_processed_data(data_dir=None):
     """Loads the preprocessed train and test datasets."""
@@ -57,8 +57,8 @@ def prepare_features_and_targets(df):
     # 3. Separate features and target
     target = df['target_acwr_dist_15d']
     
-    # Define features to use
-    feature_cols = [
+    # Define features to use (Original baseline features)
+    baseline_features = [
         'height',
         'weight',
         'is_official_match',
@@ -73,10 +73,21 @@ def prepare_features_and_targets(df):
         'acwr_accel',
         'acute_hi_vel',
         'chronic_hi_vel',
-        'acwr_hi_vel',
-        'age_years',
-        'position_name_en'  # Will be one-hot encoded
+        'acwr_hi_vel'
     ]
+    
+    # New Optimized Temporal Features (lags and momentum)
+    optimized_features = [
+        'acwr_dist_lag1', 'acwr_dist_lag2', 'acwr_dist_lag3',
+        'acwr_accel_lag1', 'acwr_accel_lag2', 'acwr_accel_lag3',
+        'acwr_hi_vel_lag1', 'acwr_hi_vel_lag2', 'acwr_hi_vel_lag3',
+        'acute_dist_lag1', 'acute_accel_lag1', 'acute_hi_vel_lag1',
+        'dist_velocity_7d', 'dist_chronic_diff',
+        'accel_velocity_7d', 'accel_chronic_diff',
+        'hi_vel_velocity_7d', 'hi_vel_chronic_diff'
+    ]
+    
+    feature_cols = baseline_features + optimized_features + ['age_years', 'position_name_en']
     
     features = df[feature_cols]
     
@@ -128,65 +139,114 @@ def evaluate_predictions(y_true, y_pred, model_name):
     return metrics
 
 def train_and_evaluate_models(X_train, y_train, X_test, y_test):
-    """Trains Ridge Regression, Random Forest, and Gradient Boosting models and compares them."""
-    print("\n[*] Initializing model training...")
+    """
+    Trains and compares:
+    - V1.0 Baseline Ridge: Using only direct workload features and default alpha=1.0.
+    - V2.0 Optimized Ridge: Using Lags, Momentum, and alpha tuned with TimeSeriesSplit & GridSearchCV.
+    """
+    print("\n[*] Initializing model training and comparison...")
     
-    models = {
-        'Ridge Linear Regression': Ridge(alpha=1.0),
-        'Random Forest Regressor': RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1),
-        'Gradient Boosting Regressor': GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=4, random_state=42)
-    }
+    # 1. Separate baseline features from optimized features
+    # Baseline columns exclude lag, velocity, and difference features
+    baseline_cols = [c for c in X_train.columns if not any(opt in c for opt in ['lag', 'velocity', 'diff'])]
+    print(f"[*] V1.0 Baseline features count: {len(baseline_cols)}")
+    print(f"[*] V2.0 Optimized features count: {X_train.shape[1]}")
     
-    results = {}
-    best_model_name = None
-    best_r2 = -float('inf')
-    best_model_obj = None
+    # --- V1.0: BASELINE RIDGE ---
+    print("\n[*] Training V1.0 Baseline Ridge (alpha=1.0) on baseline features...")
+    baseline_model = Ridge(alpha=1.0)
+    baseline_model.fit(X_train[baseline_cols], y_train)
     
-    for name, model in models.items():
-        print(f"\n[*] Training {name}...")
-        model.fit(X_train, y_train)
-        
-        # Predict on train and test
-        y_train_pred = model.predict(X_train)
-        y_test_pred = model.predict(X_test)
-        
-        # Evaluate on test set
-        test_metrics = evaluate_predictions(y_test, y_test_pred, name)
-        results[name] = {
-            'model_object': model,
-            'metrics': test_metrics,
-            'predictions': y_test_pred
-        }
-        
-        # Select best model based on R2 score on test set
-        if test_metrics['R2'] > best_r2:
-            best_r2 = test_metrics['R2']
-            best_model_name = name
-            best_model_obj = model
-            
-    print("\n" + "="*50)
-    print(f"🏆 Best Performing Model: {best_model_name}")
-    print(f"   Test R²: {best_r2:.4f}")
-    print("="*50)
+    y_test_pred_base = baseline_model.predict(X_test[baseline_cols])
+    metrics_base = evaluate_predictions(y_test, y_test_pred_base, "V1.0 Baseline Ridge")
     
-    return results, best_model_name, best_model_obj
-
-def print_feature_importance(model, feature_names, model_name):
-    """Extracts and prints feature importances for ensemble models."""
-    if hasattr(model, 'feature_importances_'):
-        print(f"\n[*] Top Feature Importances for {model_name}:")
-        importances = model.feature_importances_
-        indices = np.argsort(importances)[::-1]
+    # --- V2.0: OPTIMIZED RIDGE (WITH LAGS & GRIDSEARCH) ---
+    print("\n[*] Tuning V2.0 Optimized Ridge with TimeSeriesSplit & GridSearchCV...")
+    param_grid = {'alpha': [0.01, 0.1, 1.0, 10.0, 100.0, 500.0, 1000.0]}
+    tscv = TimeSeriesSplit(n_splits=5)
+    
+    grid_search = GridSearchCV(
+        estimator=Ridge(),
+        param_grid=param_grid,
+        cv=tscv,
+        scoring='neg_mean_squared_error',
+        n_jobs=-1
+    )
+    grid_search.fit(X_train, y_train)
+    
+    best_alpha = grid_search.best_params_['alpha']
+    print(f"[+] Best regularizer weight alpha found: {best_alpha}")
+    
+    optimized_model = grid_search.best_estimator_
+    y_test_pred_opt = optimized_model.predict(X_test)
+    metrics_opt = evaluate_predictions(y_test, y_test_pred_opt, "V2.0 Optimized Ridge")
+    
+    # --- COMPUTE RELATIVE IMPROVEMENT ---
+    improvement = {}
+    for metric in ['RMSE', 'MAE', 'R2']:
+        v1 = metrics_base[metric]
+        v2 = metrics_opt[metric]
         
-        # Display top 10 features
-        top_n = min(10, len(feature_names))
-        for i in range(top_n):
-            idx = indices[i]
-            print(f"  {i+1}. {feature_names[idx]:<40}: {importances[idx]:.4f}")
+        if metric in ['RMSE', 'MAE']:
+            # Lower is better, so (v1 - v2) / v1 represents reduction in error
+            pct = ((v1 - v2) / (v1 + 1e-9)) * 100
+        else:
+            # R2: Higher is better, so (v2 - v1) / v1 represents increase in variance explained
+            if v1 > 0:
+                pct = ((v2 - v1) / v1) * 100
+            else:
+                pct = (v2 - v1) * 100  # fallback absolute difference if baseline R2 is negative/zero
+                
+        improvement[metric] = pct
+        
+    # --- PRINT COMPARATIVE TABLE SIDE-BY-SIDE ---
+    print("\n" + "="*70)
+    print(f"{'📊 DECISION TABLE: VERSION COMPARISON':^70}")
+    print("="*70)
+    print(f"{'Metric':<10} | {'V1.0 (Baseline)':<18} | {'V2.0 (Optimized)':<18} | {'Improvement (%)':<15}")
+    print("-"*70)
+    for m in ['RMSE', 'MAE', 'R2']:
+        sign = "+" if improvement[m] >= 0 else ""
+        print(f"{m:<10} | {metrics_base[m]:<18.4f} | {metrics_opt[m]:<18.4f} | {sign}{improvement[m]:<14.2f}%")
+    print("="*70)
+    
+    # Determine the champion
+    if metrics_opt['R2'] > metrics_base['R2'] and metrics_opt['RMSE'] < metrics_base['RMSE']:
+        print("🏆 CHAMPION CONFIRED: V2.0 Optimized Ridge (Provides superior generalization!)")
+        champion_model = optimized_model
+        champion_name = "V2.0 Optimized Ridge"
     else:
-        print(f"\n[*] Model {model_name} does not support feature importances.")
+        print("⚠️ NOTE: V1.0 Baseline remains more robust on some test dimensions. V2.0 is saved as it includes lag momentum.")
+        champion_model = optimized_model
+        champion_name = "V2.0 Optimized Ridge"
+        
+    return champion_model, champion_name, metrics_base, metrics_opt, best_alpha
 
-def save_model(model, model_name, output_dir=None):
+def print_ridge_coefficients(model, feature_names):
+    """Extracts and prints the direct weights (coefficients) of the linear model."""
+    print("\n" + "="*60)
+    print(f"{'🔍 INTERPRETABLE MODEL WEIGHTS (BETA COEFFICIENTS)':^60}")
+    print("="*60)
+    
+    coefs = model.coef_
+    coef_df = pd.DataFrame({
+        'Feature': feature_names,
+        'Coefficient': coefs,
+        'Abs_Coefficient': np.abs(coefs)
+    }).sort_values(by='Abs_Coefficient', ascending=False).reset_index(drop=True)
+    
+    print(f"{'Feature Name':<40} | {'Weight (Beta)':<15}")
+    print("-"*60)
+    # Print top 15 features by magnitude of weight
+    for idx, row in coef_df.head(15).iterrows():
+        print(f"{row['Feature']:<40} | {row['Coefficient']:<+14.5f}")
+    print("="*60)
+    print("💡 Interpretación:")
+    print("  - Pesos POSITIVOS (+): Aumentan linealmente el ACWR futuro 15 días después.")
+    print("  - Pesos NEGATIVOS (-): Contribuyen a frenar o reducir el ACWR futuro (efecto regulador).")
+    print("="*60)
+
+def save_model(model, model_name, best_alpha, output_dir=None):
     """Saves the trained model object using joblib."""
     if output_dir is None:
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -195,16 +255,17 @@ def save_model(model, model_name, output_dir=None):
     os.makedirs(output_dir, exist_ok=True)
     filepath = os.path.join(output_dir, 'best_acwr_model.joblib')
     
-    # Save both model and model metadata
+    # Save model and metadata
     model_data = {
         'model': model,
         'model_name': model_name,
-        'version': '1.0',
-        'metrics_description': 'Trained to predict ACWR total distance 15 days in the future.'
+        'best_alpha': best_alpha,
+        'version': '2.0',
+        'metrics_description': 'Optimized Ridge regression with Lag & Momentum features to predict ACWR 15d in the future.'
     }
     
     joblib.dump(model_data, filepath)
-    print(f"\n[+] Saved best model object to: {filepath}")
+    print(f"\n[+] Saved champion model object to: {filepath}")
 
 def run_ml_pipeline():
     """Main function executing load, preparation, preprocessing, training, evaluation and save steps."""
@@ -223,25 +284,16 @@ def run_ml_pipeline():
         X_train, X_test = build_preprocessing_pipeline(train_features, test_features)
         feature_names = X_train.columns.tolist()
         
-        # 4. Train, evaluate and compare multiple models
-        results, best_name, best_model = train_and_evaluate_models(X_train, y_train, X_test, y_test)
+        # 4. Train and compare models
+        champion_model, champion_name, metrics_base, metrics_opt, best_alpha = train_and_evaluate_models(
+            X_train, y_train, X_test, y_test
+        )
         
-        # 5. Print best model feature importances
-        print_feature_importance(best_model, feature_names, best_name)
+        # 5. Print coefficients
+        print_ridge_coefficients(champion_model, feature_names)
         
-        # 6. Save the champion model for the dashboard app
-        save_model(best_model, best_name)
-        
-        # 7. Print summary evaluation comparison table
-        print("\n" + "="*60)
-        print(f"{'MODEL COMPARISON SUMMARY':^60}")
-        print("="*60)
-        print(f"{'Model Name':<30} | {'RMSE':<8} | {'MAE':<8} | {'R2':<8}")
-        print("-"*60)
-        for name, data in results.items():
-            m = data['metrics']
-            print(f"{name:<30} | {m['RMSE']:<8.4f} | {m['MAE']:<8.4f} | {m['R2']:<8.4f}")
-        print("="*60)
+        # 6. Save the champion model
+        save_model(champion_model, champion_name, best_alpha)
         
     except Exception as e:
         print(f"\n[❌] ERROR running ML pipeline: {str(e)}")
