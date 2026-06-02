@@ -51,11 +51,12 @@ def prepare_features_and_targets(df):
     df['date_of_birth'] = pd.to_datetime(df['date_of_birth'])
     df['age_years'] = (df['date'] - df['date_of_birth']).dt.days / 365.25
     
-    # 2. Filter out rows where the 15-day shifted target is NaN (since we cannot train/test on them)
-    df = df.dropna(subset=['target_acwr_dist_15d']).reset_index(drop=True)
+    # 2. Define the 15 target columns and drop rows where any target is NaN
+    target_cols = [f'target_acwr_dist_{h}d' for h in range(1, 16)]
+    df = df.dropna(subset=target_cols).reset_index(drop=True)
     
-    # 3. Separate features and target
-    target = df['target_acwr_dist_15d']
+    # 3. Separate features and target matrix (shape: n_samples, 15)
+    target = df[target_cols]
     
     # Define features to use (Original baseline features)
     baseline_features = [
@@ -119,23 +120,43 @@ def build_preprocessing_pipeline(train_features, test_features):
     return encoded_train, encoded_test
 
 def evaluate_predictions(y_true, y_pred, model_name):
-    """Calculates RMSE, MAE, and R² score."""
-    mse = mean_squared_error(y_true, y_pred)
-    rmse = np.sqrt(mse)
-    mae = mean_absolute_error(y_true, y_pred)
-    r2 = r2_score(y_true, y_pred)
+    """Calculates RMSE, MAE, and R² score (both global averages and individual daily trajectory values)."""
+    # Convert inputs to numpy arrays for reliable multi-output indexing
+    y_true_arr = np.array(y_true)
+    y_pred_arr = np.array(y_pred)
+    
+    # 1. Global averages (default behavior)
+    mse_global = mean_squared_error(y_true_arr, y_pred_arr)
+    rmse_global = np.sqrt(mse_global)
+    mae_global = mean_absolute_error(y_true_arr, y_pred_arr)
+    r2_global = r2_score(y_true_arr, y_pred_arr)
+    
+    # 2. Raw daily values
+    mse_days = mean_squared_error(y_true_arr, y_pred_arr, multioutput='raw_values')
+    rmse_days = np.sqrt(mse_days)
+    mae_days = mean_absolute_error(y_true_arr, y_pred_arr, multioutput='raw_values')
+    r2_days = r2_score(y_true_arr, y_pred_arr, multioutput='raw_values')
     
     metrics = {
-        'RMSE': rmse,
-        'MAE': mae,
-        'R2': r2
+        'RMSE': rmse_global,
+        'MAE': mae_global,
+        'R2': r2_global,
+        'RMSE_days': rmse_days,
+        'MAE_days': mae_days,
+        'R2_days': r2_days
     }
     
-    print(f"\n===== Evaluation Results: {model_name} =====")
-    print(f"  - Root Mean Squared Error (RMSE): {rmse:.4f}")
-    print(f"  - Mean Absolute Error (MAE):      {mae:.4f}")
-    print(f"  - R² Coefficient of Determination: {r2:.4f}")
+    print(f"\n===== Evaluation Results: {model_name} (Global Average) =====")
+    print(f"  - Root Mean Squared Error (RMSE): {rmse_global:.4f}")
+    print(f"  - Mean Absolute Error (MAE):      {mae_global:.4f}")
+    print(f"  - R² Coefficient of Determination: {r2_global:.4f}")
     
+    # Concise trajectory summary print
+    print("📈 Daily Trajectory Sample (MAE / R2):")
+    sample_days = [0, 2, 6, 9, 14]  # Days 1, 3, 7, 10, 15 (0-indexed)
+    for d in sample_days:
+        print(f"    - Day {d+1:2d}: MAE={mae_days[d]:.4f} | R2={r2_days[d]:.4f}")
+        
     return metrics
 
 def train_and_evaluate_models(X_train, y_train, X_test, y_test):
@@ -224,27 +245,33 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test):
 
 def print_ridge_coefficients(model, feature_names):
     """Extracts and prints the direct weights (coefficients) of the linear model."""
-    print("\n" + "="*60)
-    print(f"{'🔍 INTERPRETABLE MODEL WEIGHTS (BETA COEFFICIENTS)':^60}")
-    print("="*60)
+    print("\n" + "="*75)
+    print(f"{'🔍 INTERPRETABLE MODEL WEIGHTS (TRAJECTORY BETA COEFFICIENTS)':^75}")
+    print("="*75)
     
-    coefs = model.coef_
+    coefs = model.coef_  # Shape: (15, n_features)
+    mean_coefs = np.mean(coefs, axis=0)
+    abs_mean_coefs = np.abs(mean_coefs)
+    
     coef_df = pd.DataFrame({
         'Feature': feature_names,
-        'Coefficient': coefs,
-        'Abs_Coefficient': np.abs(coefs)
-    }).sort_values(by='Abs_Coefficient', ascending=False).reset_index(drop=True)
+        'Mean_Coefficient': mean_coefs,
+        'Abs_Mean_Coefficient': abs_mean_coefs,
+        'Day1_Coefficient': coefs[0, :],
+        'Day15_Coefficient': coefs[14, :]
+    }).sort_values(by='Abs_Mean_Coefficient', ascending=False).reset_index(drop=True)
     
-    print(f"{'Feature Name':<40} | {'Weight (Beta)':<15}")
-    print("-"*60)
+    print(f"{'Feature Name':<30} | {'Mean Weight':<12} | {'Day 1 Weight':<12} | {'Day 15 Weight':<12}")
+    print("-"*75)
     # Print top 15 features by magnitude of weight
     for idx, row in coef_df.head(15).iterrows():
-        print(f"{row['Feature']:<40} | {row['Coefficient']:<+14.5f}")
-    print("="*60)
+        print(f"{row['Feature']:<30} | {row['Mean_Coefficient']:<+12.4f} | {row['Day1_Coefficient']:<+12.4f} | {row['Day15_Coefficient']:<+12.4f}")
+    print("="*75)
     print("💡 Interpretación:")
-    print("  - Pesos POSITIVOS (+): Aumentan linealmente el ACWR futuro 15 días después.")
-    print("  - Pesos NEGATIVOS (-): Contribuyen a frenar o reducir el ACWR futuro (efecto regulador).")
-    print("="*60)
+    print("  - Pesos POSITIVOS (+): Aumentan linealmente el ACWR en su día respectivo.")
+    print("  - Pesos NEGATIVOS (-): Amortiguan o reducen el ACWR futuro.")
+    print("  - Observa cómo algunos pesos cambian de magnitud o signo del Día 1 al Día 15!")
+    print("="*75)
 
 def save_model(model, model_name, best_alpha, output_dir=None):
     """Saves the trained model object using joblib."""

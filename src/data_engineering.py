@@ -186,22 +186,17 @@ def compute_acwr_features(df):
     print("[+] ACWR and lag/momentum calculations completed.")
     return df
 
-def create_predictive_target(df, horizon_days=15):
+def create_predictive_target(df, max_horizon=15):
     """
     Creates target variables for predicting future workload states.
-    For example, predicting the ACWR or workload 15 days in the future.
+    Creates 15 target columns from 1 to 15 days in the future.
     """
-    print(f"[*] Creating target variables shifted by {horizon_days} days into the future...")
+    print(f"[*] Creating target variables for horizons 1 to {max_horizon} days...")
     
-    # Target: ACWR based on distance 15 days from now
-    df['target_acwr_dist_15d'] = df.groupby('player_id')['acwr_dist'].shift(-horizon_days)
-    
-    # Target: High injury risk flag (ACWR > 1.5) 15 days from now
-    df['target_high_risk_15d'] = (df['target_acwr_dist_15d'] > 1.5).astype(float)
-    
-    # Since we shift backward to predict the future, the last `horizon_days` of each player
-    # will have NaN targets. We must drop or separate them for actual future inference.
-    print("[+] Target creation completed.")
+    for h in range(1, max_horizon + 1):
+        df[f'target_acwr_dist_{h}d'] = df.groupby('player_id')['acwr_dist'].shift(-h)
+        
+    print("[+] Multi-target creation completed.")
     return df
 
 def split_train_test_chronological(df, test_size=0.10):
@@ -280,8 +275,8 @@ def run_pipeline():
         # 5. Compute ACWR features
         features_df = compute_acwr_features(continuous_df)
         
-        # 6. Create future targets (15-day horizon for predictive model)
-        features_with_targets = create_predictive_target(features_df, horizon_days=15)
+        # 6. Create future targets (1-to-15 day horizons for predictive model)
+        features_with_targets = create_predictive_target(features_df, max_horizon=15)
         
         # 7. Split train and test chronologically (10% test)
         train_df, test_df = split_train_test_chronological(features_with_targets, test_size=0.10)
