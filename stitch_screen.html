@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SMARTLOAD | Real Madrid Elite Performance</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.cdnfonts.com/css/geist');
+        
+        body {
+            background-color: #080C14;
+            color: #e5e2e1;
+            font-family: 'Geist', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(13, 18, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(13, 18, 30, 0.7);
+        }
+
+        .status-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .chart-gradient-cyan {
+            background: linear-gradient(to bottom, rgba(0, 219, 233, 0.2) 0%, transparent 100%);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#00dbe9",
+                      "tertiary": "#ffffff",
+                      "error-container": "#93000a",
+                      "background": "#080C14",
+                      "tertiary-fixed": "#e2e2e2",
+                      "inverse-on-surface": "#313030",
+                      "inverse-primary": "#5d5f5f",
+                      "secondary": "#d3fbff",
+                      "on-primary-fixed-variant": "#454747",
+                      "outline": "#8e9192",
+                      "on-tertiary-container": "#636565",
+                      "on-secondary-fixed": "#002022",
+                      "on-primary-container": "#636565",
+                      "surface-container-lowest": "#0e0e0e",
+                      "primary": "#ffffff",
+                      "on-secondary-fixed-variant": "#004f54",
+                      "tertiary-container": "#e2e2e2",
+                      "on-primary-fixed": "#1a1c1c",
+                      "on-surface-variant": "#c4c7c8",
+                      "surface-container-low": "#1c1b1b",
+                      "on-background": "#e5e2e1",
+                      "primary-fixed": "#e2e2e2",
+                      "surface-container-high": "#2a2a2a",
+                      "on-tertiary-fixed": "#1a1c1c",
+                      "surface-tint": "#c6c6c7",
+                      "outline-variant": "#444748",
+                      "surface-variant": "#353434",
+                      "surface-dim": "#141313",
+                      "primary-fixed-dim": "#c6c6c7",
+                      "on-error": "#690005",
+                      "on-surface": "#e5e2e1",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#201f1f",
+                      "inverse-surface": "#e5e2e1",
+                      "on-tertiary-fixed-variant": "#454747",
+                      "tertiary-fixed-dim": "#c6c6c7",
+                      "on-primary": "#2f3131",
+                      "on-secondary": "#00363a",
+                      "surface": "#141313",
+                      "surface-bright": "#3a3939",
+                      "secondary-fixed": "#7df4ff",
+                      "secondary-container": "#00eefc",
+                      "primary-container": "#e2e2e2",
+                      "error": "#ffb4ab",
+                      "surface-container-highest": "#353434",
+                      "on-secondary-container": "#00686f",
+                      "on-tertiary": "#2f3131"
+              },
+              "borderRadius": {
+                      "DEFAULT": "2px",
+                      "lg": "4px",
+                      "xl": "8px",
+                      "full": "12px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "xl": "32px",
+                      "margin-mobile": "16px",
+                      "md": "16px",
+                      "margin-desktop": "40px",
+                      "xs": "4px",
+                      "gutter": "20px",
+                      "sm": "8px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Geist"],
+                      "body-md": ["Geist"],
+                      "label-md": ["JetBrains Mono"],
+                      "data-numeral": ["Geist"],
+                      "headline-lg": ["Geist"],
+                      "headline-md": ["Geist"],
+                      "headline-lg-mobile": ["Geist"],
+                      "body-lg": ["Geist"],
+                      "label-sm": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                      "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                      "data-numeral": ["24px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                      "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                      "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg py-md bg-background/60 backdrop-blur-xl border-b border-white/10 h-16">
+<div class="flex items-center gap-md">
+<span class="font-display-lg text-headline-md font-bold tracking-tighter text-primary">SMARTLOAD | RM</span>
+<div class="flex items-center gap-xs ml-4 px-sm py-1 bg-white/5 rounded-full border border-white/10">
+<span class="w-2 h-2 rounded-full bg-secondary-container status-pulse"></span>
+<span class="font-label-sm text-label-sm text-secondary-fixed-dim uppercase tracking-widest">API Activa</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="flex items-center gap-sm px-lg py-sm border border-secondary-fixed-dim bg-secondary-fixed-dim/10 text-secondary-fixed-dim font-label-md text-label-md rounded-lg hover:bg-secondary-fixed-dim/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">sensors</span>
+                Registrar Entrenamiento
+            </button>
+<div class="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-on-surface">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Side Navigation -->
+<nav class="fixed left-0 top-0 h-full z-40 flex flex-col py-lg w-20 hover:w-64 bg-surface-container-lowest/40 backdrop-blur-2xl border-r border-white/5 transition-all duration-300 group pt-20">
+<div class="flex flex-col gap-unit px-sm grow">
+<a class="flex items-center gap-md p-md rounded-lg text-secondary-fixed-dim border-r-2 border-secondary-fixed-dim bg-secondary-fixed-dim/5 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="opacity-0 group-hover:opacity-100 font-label-md text-label-md whitespace-nowrap transition-opacity">Dashboard</span>
+</a>
+<a class="flex items-center gap-md p-md rounded-lg text-outline hover:text-on-surface hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="opacity-0 group-hover:opacity-100 font-label-md text-label-md whitespace-nowrap transition-opacity">Squad Health</span>
+</a>
+<a class="flex items-center gap-md p-md rounded-lg text-outline hover:text-on-surface hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="opacity-0 group-hover:opacity-100 font-label-md text-label-md whitespace-nowrap transition-opacity">Performance</span>
+</a>
+<a class="flex items-center gap-md p-md rounded-lg text-outline hover:text-on-surface hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">event_upcoming</span>
+<span class="opacity-0 group-hover:opacity-100 font-label-md text-label-md whitespace-nowrap transition-opacity">Load Planner</span>
+</a>
+</div>
+<div class="px-sm mt-auto mb-lg">
+<a class="flex items-center gap-md p-md rounded-lg text-outline hover:text-on-surface hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="opacity-0 group-hover:opacity-100 font-label-md text-label-md whitespace-nowrap transition-opacity">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-20 pt-24 px-lg pb-xl max-w-[1600px]">
+<!-- Player Quick Select -->
+<section class="mb-xl">
+<h2 class="font-label-sm text-label-sm text-outline uppercase tracking-[0.2em] mb-md ml-1">Elite Roster Selection</h2>
+<div class="flex gap-lg overflow-x-auto pb-md custom-scrollbar">
+<!-- Player 1: Bellingham -->
+<div class="flex-shrink-0 w-64 glass-card p-md rounded-xl flex items-center gap-md cursor-pointer border-transparent hover:border-secondary-fixed-dim">
+<div class="relative">
+<img alt="Bellingham" class="w-14 h-14 rounded-full object-cover border-2 border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDu2i1GgmDs-fvj8ei7SWshNJK17UaOQkNTrcn9OJTcrrxSUnDDbEXeWm740E83EdFMA2_BEGEXIEF7kNKEYhgHPea1TUqeWjWw5W7ox9c3qdJXpu_8Je3jJf2MbvSfMMREQuBYfju_TAOgd23BGljpTQbYLLpUTd5c8V_pTVEOUhfhSeYCPXxKVhsOuqEBmcTUz3MBQ1dG3RpkhuHUPNEGX8zjztrCFArxA0i-bmK_9tqWAup_lrWAIXOG_WZBgM-6z95I-fWUAw"/>
+<div class="absolute -bottom-1 -right-1 bg-white text-background w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold">5</div>
+</div>
+<div>
+<p class="font-headline-md text-[16px] leading-tight mb-1">Jude Bellingham</p>
+<span class="px-sm py-0.5 rounded-full bg-secondary-container/10 text-secondary-container font-label-sm text-[10px]">1.2 - Óptimo</span>
+</div>
+</div>
+<!-- Player 2: Vinicius (Selected State) -->
+<div class="flex-shrink-0 w-64 glass-card p-md rounded-xl flex items-center gap-md cursor-pointer border-secondary-fixed-dim bg-secondary-fixed-dim/10">
+<div class="relative">
+<img alt="Vinicius" class="w-14 h-14 rounded-full object-cover border-2 border-secondary-fixed-dim" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF2NVsXtDo3-ahiqp8KRHOUKM1_3GZFnh2Qve9trq5buB943-Ip2y68KIk43lKfXh3Rm-aNyRmqIXgkB6Utr_LbaF3130euRtDt9VJ4Dz5Fju3Bb3kUeu7t6XIgUkfSHt9mevg32b4Q6RpHpNAVeNKuOsdwNPEeP0tpCb_bt6LKehmgLxsdy084sHuEEVMpFErrs0N7jpbF-cUtzmjGhgR2bviOiuJYd7RvqyoZn6HaCmk5TuOG0yP1rRa3KzKIZ000G2U8R95hg"/>
+<div class="absolute -bottom-1 -right-1 bg-secondary-fixed-dim text-background w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold">7</div>
+</div>
+<div>
+<p class="font-headline-md text-[16px] leading-tight mb-1">Vinícius Jr.</p>
+<span class="px-sm py-0.5 rounded-full bg-error/10 text-error font-label-sm text-[10px] flex items-center gap-1">
+<span class="w-1 h-1 rounded-full bg-error"></span>
+                            1.48 - Precaución
+                        </span>
+</div>
+</div>
+<!-- Player 3: Modric -->
+<div class="flex-shrink-0 w-64 glass-card p-md rounded-xl flex items-center gap-md cursor-pointer border-transparent hover:border-secondary-fixed-dim">
+<div class="relative">
+<img alt="Modric" class="w-14 h-14 rounded-full object-cover border-2 border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFo7N0E8_CX1MOLd1azuK7BJ7gxJs1IW8DwzoCGGqGJx40IbO6_In7sWjWasJpyLtVf2pS_K1gZ_VSoisHtwxpvrZrkQpgt3Wb8FIQkikeOh_eyuo6TwIHU0ph6JmvQFxyUUpExgPmKS8njaOVXlfUkKeJOaknGn_bGP1YLGFfDVbpYU7tHdrgZfoClqVp_JrNu2aFpepTHb-3_j8VIUT4aldK3UFV_m54bGVyS10PoRUI-kEKLLvtByrD3Y9OxMv2pqB9M7EI9A"/>
+<div class="absolute -bottom-1 -right-1 bg-white text-background w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold">10</div>
+</div>
+<div>
+<p class="font-headline-md text-[16px] leading-tight mb-1">Luka Modrić</p>
+<span class="px-sm py-0.5 rounded-full bg-secondary-container/10 text-secondary-container font-label-sm text-[10px]">0.9 - Recovery</span>
+</div>
+</div>
+<!-- Player 4: Valverde -->
+<div class="flex-shrink-0 w-64 glass-card p-md rounded-xl flex items-center gap-md cursor-pointer border-transparent hover:border-secondary-fixed-dim">
+<div class="relative">
+<img alt="Valverde" class="w-14 h-14 rounded-full object-cover border-2 border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEvxfrkWnmN0WmLZp6nCuyfcgE8IrH4e8DSC0_bBFDXY1Qs7zQ3oSaer5aquM8NrriEpNdBCLumPEHAKD2b2VKjSqzhAtgwJGMmh6uCHvdxqkysh3GEpoQ_CAb1hB4vIpM3YzhGNd7K9by1S9MEgnrnsMqztJwbAOYalznGu1O67xzov6BGxbpdKRqqMtmVigA4K4a5YdTU7FeTQ7ibkYdZtSPOSHTKiyVRb1febPghvw0QFB7ugHgTMq4A7lZ4wVhQzbffwWiig"/>
+<div class="absolute -bottom-1 -right-1 bg-white text-background w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold">8</div>
+</div>
+<div>
+<p class="font-headline-md text-[16px] leading-tight mb-1">Fede Valverde</p>
+<span class="px-sm py-0.5 rounded-full bg-secondary-container/10 text-secondary-container font-label-sm text-[10px]">1.1 - Óptimo</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Squad KPI Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-xl">
+<div class="glass-card p-lg rounded-xl flex flex-col gap-xs">
+<span class="font-label-md text-outline">Total Plantilla</span>
+<div class="flex items-end gap-sm">
+<span class="font-display-lg text-[32px] text-primary">25</span>
+<span class="font-label-sm text-on-surface-variant pb-1.5">Atletas activos</span>
+</div>
+</div>
+<div class="glass-card p-lg rounded-xl flex flex-col gap-xs">
+<span class="font-label-md text-outline">Tasa de Fitness</span>
+<div class="flex items-end gap-sm">
+<span class="font-display-lg text-[32px] text-secondary-container">84%</span>
+<span class="font-label-sm text-secondary-container pb-1.5">Estado Óptimo</span>
+</div>
+</div>
+<div class="glass-card p-lg rounded-xl flex flex-col gap-xs">
+<span class="font-label-md text-outline">Alertas de Fatiga</span>
+<div class="flex items-end gap-sm">
+<span class="font-display-lg text-[32px] text-error">3</span>
+<span class="font-label-sm text-error pb-1.5">Atletas en observación</span>
+</div>
+</div>
+<div class="glass-card p-lg rounded-xl flex flex-col gap-xs">
+<span class="font-label-md text-outline">Riesgo Alto</span>
+<div class="flex items-end gap-sm">
+<span class="font-display-lg text-[32px] text-error-container">2</span>
+<span class="font-label-sm text-error-container pb-1.5">Riesgo inminente</span>
+</div>
+</div>
+</section>
+<!-- Player Deep Dive Bento -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column: Bio & Highlight -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- Bio Card -->
+<div class="glass-card rounded-xl overflow-hidden">
+<div class="h-48 relative overflow-hidden">
+<img alt="Vinicius Portrait" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF2NVsXtDo3-ahiqp8KRHOUKM1_3GZFnh2Qve9trq5buB943-Ip2y68KIk43lKfXh3Rm-aNyRmqIXgkB6Utr_LbaF3130euRtDt9VJ4Dz5Fju3Bb3kUeu7t6XIgUkfSHt9mevg32b4Q6RpHpNAVeNKuOsdwNPEeP0tpCb_bt6LKehmgLxsdy084sHuEEVMpFErrs0N7jpbF-cUtzmjGhgR2bviOiuJYd7RvqyoZn6HaCmk5TuOG0yP1rRa3KzKIZ000G2U8R95hg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+<div class="absolute bottom-4 left-6 flex flex-col">
+<h3 class="font-headline-lg text-primary">Vinícius Jr.</h3>
+<span class="font-label-md text-outline uppercase tracking-widest">Dorsal 7 | Delantero</span>
+</div>
+</div>
+<div class="p-lg grid grid-cols-2 gap-md">
+<div class="flex flex-col">
+<span class="font-label-sm text-outline">Edad</span>
+<span class="font-body-lg text-primary">23 años</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-outline">Altura</span>
+<span class="font-body-lg text-primary">176 cm</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-outline">Peso</span>
+<span class="font-body-lg text-primary">73 kg</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-outline">Grasa Corp.</span>
+<span class="font-body-lg text-primary">7.2%</span>
+</div>
+</div>
+</div>
+<!-- Digital ACWR Display -->
+<div class="glass-card p-lg rounded-xl bg-error/5 border-error/20 flex flex-col items-center justify-center text-center">
+<span class="font-label-sm text-outline uppercase tracking-[0.2em] mb-sm">Acute:Chronic Workload Ratio</span>
+<div class="font-display-lg text-[48px] text-error font-bold leading-none mb-2">1.48</div>
+<div class="flex items-center gap-sm px-md py-1 bg-error/10 border border-error/20 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-error">warning</span>
+<span class="font-label-md text-error uppercase">Precaución (Overload)</span>
+</div>
+<p class="mt-lg font-body-md text-outline text-sm">Carga actual 24% por encima de la media histórica de 21 días. Se recomienda reducción de volumen.</p>
+</div>
+</div>
+<!-- Right Column: Graphs & Simulator -->
+<div class="lg:col-span-8 flex flex-col gap-gutter">
+<!-- Fatigue Chart Module -->
+<div class="glass-card rounded-xl p-lg flex flex-col h-[400px]">
+<div class="flex justify-between items-center mb-xl">
+<h3 class="font-headline-md text-primary">Monitoreo de Fatiga &amp; Proyección IA</h3>
+<div class="flex gap-md">
+<div class="flex items-center gap-sm">
+<span class="w-3 h-0.5 bg-secondary-fixed-dim"></span>
+<span class="font-label-sm text-outline">Histórico</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="w-3 h-0.5 border-t border-dashed border-secondary-container"></span>
+<span class="font-label-sm text-outline">Proyección</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="w-3 h-0.5 border-t border-dashed border-error"></span>
+<span class="font-label-sm text-outline">AI Prediction</span>
+</div>
+</div>
+</div>
+<div class="relative flex-grow border-l border-b border-white/10 mt-4">
+<!-- Horizontal Bands -->
+<div class="absolute top-0 left-0 w-full h-[25%] bg-error/10 border-t border-error/20 flex items-center pl-2">
+<span class="font-label-sm text-[10px] text-error uppercase opacity-50">Danger Zone</span>
+</div>
+<div class="absolute top-[25%] left-0 w-full h-[25%] bg-error/5 border-t border-error/10 flex items-center pl-2">
+<span class="font-label-sm text-[10px] text-error-container uppercase opacity-50">Warning Zone</span>
+</div>
+<div class="absolute top-[50%] left-0 w-full h-[50%] bg-secondary-container/5 border-t border-white/5 flex items-center pl-2">
+<span class="font-label-sm text-[10px] text-secondary-container uppercase opacity-50">Optimal Zone</span>
+</div>
+<!-- Technical Chart Representation (SVG) -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none">
+<!-- Historical Line -->
+<path class="opacity-100" d="M0 80 Q 100 75, 200 90 T 400 60 T 600 70" fill="none" stroke="#00dbe9" stroke-width="2"></path>
+<!-- Projection Line -->
+<path d="M600 70 Q 700 85, 800 100" fill="none" stroke="#00eefc" stroke-dasharray="4" stroke-width="2"></path>
+<!-- AI Prediction -->
+<path d="M600 70 Q 700 60, 800 40" fill="none" stroke="#ffb4ab" stroke-dasharray="4" stroke-width="2"></path>
+<!-- Dots -->
+<circle cx="600" cy="70" fill="#00dbe9" r="4"></circle>
+</svg>
+</div>
+<div class="flex justify-between mt-md px-md">
+<span class="font-label-sm text-outline">Lunes</span>
+<span class="font-label-sm text-outline">Martes</span>
+<span class="font-label-sm text-outline">Miércoles</span>
+<span class="font-label-sm text-on-surface font-bold">Hoy (Jueves)</span>
+<span class="font-label-sm text-outline">Viernes (Est.)</span>
+<span class="font-label-sm text-outline">Sábado (Est.)</span>
+</div>
+</div>
+<!-- What-If Planner -->
+<div class="glass-card rounded-xl p-lg">
+<div class="flex items-center justify-between mb-lg">
+<div>
+<h3 class="font-headline-md text-primary">"What-If" Planner</h3>
+<p class="font-body-md text-outline text-sm">Simula el impacto de las próximas sesiones en el ACWR</p>
+</div>
+<button class="px-md py-sm border border-white/10 rounded-lg font-label-md text-on-surface hover:bg-white/5 transition-colors">
+                            Reiniciar Plan
+                        </button>
+</div>
+<div class="flex gap-md overflow-x-auto pb-lg custom-scrollbar">
+<!-- Simulation Day Items -->
+<div class="flex-shrink-0 w-36 glass-card p-sm rounded-lg flex flex-col gap-sm border-secondary-fixed-dim/30">
+<span class="font-label-sm text-outline text-center border-b border-white/5 pb-2">Viernes (D+1)</span>
+<select class="bg-black/40 border-white/10 text-label-sm text-on-surface rounded-lg p-1 focus:border-secondary-fixed-dim outline-none">
+<option>Descanso</option>
+<option selected="">Ligera</option>
+<option>Normal</option>
+<option>Alta Int.</option>
+<option>Partido</option>
+</select>
+<div class="bg-secondary-container/10 p-2 rounded flex flex-col items-center">
+<span class="font-label-sm text-[10px] text-secondary-container uppercase">EST. ACWR</span>
+<span class="font-data-numeral text-secondary-container">1.42</span>
+</div>
+</div>
+<div class="flex-shrink-0 w-36 glass-card p-sm rounded-lg flex flex-col gap-sm">
+<span class="font-label-sm text-outline text-center border-b border-white/5 pb-2">Sábado (D+2)</span>
+<select class="bg-black/40 border-white/10 text-label-sm text-on-surface rounded-lg p-1 focus:border-secondary-fixed-dim outline-none">
+<option selected="">Descanso</option>
+<option>Ligera</option>
+<option>Normal</option>
+<option>Alta Int.</option>
+<option>Partido</option>
+</select>
+<div class="bg-secondary-container/10 p-2 rounded flex flex-col items-center">
+<span class="font-label-sm text-[10px] text-secondary-container uppercase">EST. ACWR</span>
+<span class="font-data-numeral text-secondary-container">1.35</span>
+</div>
+</div>
+<div class="flex-shrink-0 w-36 glass-card p-sm rounded-lg flex flex-col gap-sm border-error/30">
+<span class="font-label-sm text-outline text-center border-b border-white/5 pb-2">Domingo (D+3)</span>
+<select class="bg-black/40 border-white/10 text-label-sm text-on-surface rounded-lg p-1 focus:border-secondary-fixed-dim outline-none">
+<option>Descanso</option>
+<option>Ligera</option>
+<option>Normal</option>
+<option>Alta Int.</option>
+<option selected="">Partido</option>
+</select>
+<div class="bg-error/10 p-2 rounded flex flex-col items-center">
+<span class="font-label-sm text-[10px] text-error uppercase">EST. ACWR</span>
+<span class="font-data-numeral text-error">1.51</span>
+</div>
+</div>
+<!-- Repeat for more days... -->
+<div class="flex-shrink-0 w-36 glass-card p-sm rounded-lg flex flex-col gap-sm opacity-50">
+<span class="font-label-sm text-outline text-center border-b border-white/5 pb-2">Lunes (D+4)</span>
+<select class="bg-black/40 border-white/10 text-label-sm text-on-surface rounded-lg p-1">
+<option selected="">Normal</option>
+</select>
+<div class="bg-white/5 p-2 rounded flex flex-col items-center">
+<span class="font-label-sm text-[10px] text-outline uppercase">EST. ACWR</span>
+<span class="font-data-numeral text-primary">--</span>
+</div>
+</div>
+<div class="flex-shrink-0 w-36 glass-card p-sm rounded-lg flex flex-col gap-sm opacity-50">
+<span class="font-label-sm text-outline text-center border-b border-white/5 pb-2">Martes (D+5)</span>
+<select class="bg-black/40 border-white/10 text-label-sm text-on-surface rounded-lg p-1">
+<option selected="">Normal</option>
+</select>
+<div class="bg-white/5 p-2 rounded flex flex-col items-center">
+<span class="font-label-sm text-[10px] text-outline uppercase">EST. ACWR</span>
+<span class="font-data-numeral text-primary">--</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Interactive script for demo micro-interactions -->
+<script>
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simple mock for "What-If" selector updates
+        document.querySelectorAll('select').forEach(sel => {
+            sel.addEventListener('change', (e) => {
+                const parent = e.target.closest('.flex-shrink-0');
+                const tag = parent.querySelector('.font-data-numeral');
+                const container = parent.querySelector('div');
+                
+                if (e.target.value === 'Partido') {
+                    tag.textContent = '1.51';
+                    tag.className = 'font-data-numeral text-error';
+                    container.className = 'bg-error/10 p-2 rounded flex flex-col items-center';
+                } else if (e.target.value === 'Descanso') {
+                    tag.textContent = '1.31';
+                    tag.className = 'font-data-numeral text-secondary-container';
+                    container.className = 'bg-secondary-container/10 p-2 rounded flex flex-col items-center';
+                } else {
+                    tag.textContent = '1.42';
+                    tag.className = 'font-data-numeral text-primary';
+                    container.className = 'bg-white/10 p-2 rounded flex flex-col items-center';
+                }
+            });
+        });
+    </script>
+</body></html>

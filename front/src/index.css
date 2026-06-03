@@ -1,0 +1,78 @@
+@import url('https://fonts.cdnfonts.com/css/geist');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #080C14;
+  color: #e5e2e1;
+  font-family: 'Geist', sans-serif;
+  overflow-x: hidden;
+  margin: 0;
+}
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(13, 18, 30, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(13, 18, 30, 0.75);
+  transform: translateY(-2px);
+}
+
+/* Status pulse animation */
+.status-pulse {
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 10px; }
+
+/* Chart zone bands */
+.zone-danger { background: rgba(255, 180, 171, 0.08); }
+.zone-warning { background: rgba(234, 179, 8, 0.06); }
+.zone-optimal { background: rgba(0, 238, 252, 0.04); }
+
+/* Sidebar transition */
+.sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.sidebar-label { transition: opacity 0.2s ease, width 0.3s ease; white-space: nowrap; overflow: hidden; }
+
+/* Player card selected glow */
+.player-selected {
+  border-color: #00dbe9 !important;
+  background: rgba(0, 219, 233, 0.08) !important;
+  box-shadow: 0 0 20px rgba(0, 219, 233, 0.15);
+}
+
+/* ACWR number glow */
+.acwr-danger { text-shadow: 0 0 30px rgba(255, 180, 171, 0.5); }
+.acwr-warning { text-shadow: 0 0 30px rgba(234, 179, 8, 0.5); }
+.acwr-success { text-shadow: 0 0 30px rgba(0, 238, 252, 0.5); }
+
+/* Recharts tooltip */
+.recharts-tooltip-wrapper { outline: none !important; }
+
+/* HeroUI overrides */
+.heroui-select-trigger {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
